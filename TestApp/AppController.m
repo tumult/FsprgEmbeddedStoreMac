@@ -27,7 +27,7 @@ static NSString * const kParams = @"params";
 			[[self params] setOrderProcessType:kFsprgOrderProcessDetail];
 			[[self params] setMode:kFsprgModeTest];
 		} else {
-			[self setParams:[FsprgStoreParameters parametersWithRaw:(NSMutableDictionary *)defaultParams]];
+			[self setParams:[FsprgStoreParameters parametersWithRaw:[[defaultParams mutableCopy] autorelease]]];
 		}
 		
 		[[self storeController] setDelegate:self];
@@ -64,8 +64,10 @@ static NSString * const kParams = @"params";
 - (void)awakeFromNib
 {
 	[[self storeController] setWebView:previewWebView];
-	[[window toolbar] setSelectedItemIdentifier:@"settings"];
-	[self switchToSettings:nil];
+    
+    NSToolbarItem *firstItem = [[[window toolbar] items] objectAtIndex:0];
+	[[window toolbar] setSelectedItemIdentifier:[firstItem itemIdentifier]];
+    [[firstItem target] performSelector:[firstItem action]];
 }
 
 - (IBAction)switchToSettings:(id)sender
@@ -122,7 +124,7 @@ static NSString * const kParams = @"params";
 	NSData *data = [NSPropertyListSerialization dataFromPropertyList:[order raw] 
 															  format:NSPropertyListXMLFormat_v1_0 
 													errorDescription:&errorDesc];
-	NSString *orderAsStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+	NSString *orderAsStr = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
 
 	OrderViewController *orderViewController = [[OrderViewController alloc] initWithNibName:@"OrderView" bundle:nil];
 	[orderViewController setRepresentedObject:orderAsStr];
@@ -134,12 +136,12 @@ static NSString * const kParams = @"params";
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
-	NSRunAlertPanel(@"Alert", [error localizedDescription], @"OK", nil, nil);
+    NSRunAlertPanel(@"Alert", @"%@", @"OK", nil, nil, [error localizedDescription]);
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
-	NSRunAlertPanel(@"Alert", [error localizedDescription], @"OK", nil, nil);
+    NSRunAlertPanel(@"Alert", @"%@", @"OK", nil, nil, [error localizedDescription]);
 }
 
 // NSApplicationDelegate
