@@ -74,7 +74,9 @@
 	}
 
 #if defined(MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
-	[super layout];
+	if([NSView instancesRespondToSelector:@selector(layout)]) {
+		[super layout];
+	}
 #endif
 }
 
